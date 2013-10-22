@@ -2,12 +2,13 @@
 
 module Sparsify
 
-  def self.sparse(hash)
+  def self.sparse(hash, options = {})
     result = {}
+    separator = options.fetch(:separator, ".")
 
     hash.each do |key, value|
       if value.is_a?(Hash)
-        prefixed = prefix_keys(key, value)
+        prefixed = prefix_keys(key, value, separator)
         result.merge!(prefixed)
       else
         result[key] = value
@@ -17,17 +18,17 @@ module Sparsify
     result
   end
 
-  def self.prefix_keys(prefix, hash)
+  def self.prefix_keys(prefix, hash, separator)
     result = {}
     
     hash.each do |key, value|
       if value.is_a?(Hash) && value.keys.length > 0
-        prefixed = prefix_keys(key, value)
+        prefixed = prefix_keys(key, value, separator)
         prefixed.each do |k, v|
-          result["#{prefix}.#{k}"] = v
+          result[[prefix, k].join(separator)] = v
         end
       else
-        result["#{prefix}.#{key}"] = value
+        result[[prefix, key].join(separator)] = value
       end
 
     end
@@ -35,12 +36,13 @@ module Sparsify
     result
   end
 
-  def self.unsparse(hash)
+  def self.unsparse(hash, options = {})
     result = {}
+    separator = options.fetch(:separator, ".")
 
     hash.each do |key, value|
-      if key.include?(".")
-        insert_value(result, key.split("."), value)
+      if key.include?(separator)
+        insert_value(result, key.split(separator), value)
       else
         result[key] = value
       end
