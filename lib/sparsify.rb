@@ -21,7 +21,7 @@ module Sparsify
     result = {}
     
     hash.each do |key, value|
-      if value.is_a?(Hash)
+      if value.is_a?(Hash) && value.keys.length > 0
         prefixed = prefix_keys(key, value)
         prefixed.each do |k, v|
           result["#{prefix}.#{k}"] = v
