@@ -41,7 +41,10 @@ load File.expand_path('../../spec_helper.rb', __FILE__)
 
 describe :Sparsify do
   subject { Sparsify }
-  it { should respond_to :unsparse }
+
+  it "should respond to .unsparse" do
+    expect(Sparsify.respond_to?(:unsparse)).to be true
+  end
 
   describe '::unsparse' do
     context 'when called with no arguments' do
