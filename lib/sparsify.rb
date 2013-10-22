@@ -35,4 +35,28 @@ module Sparsify
     result
   end
 
+  def self.unsparse(hash)
+    result = {}
+
+    hash.each do |key, value|
+      if key.include?(".")
+        insert_value(result, key.split("."), value)
+      else
+        result[key] = value
+      end
+    end
+
+    result
+  end
+
+  def self.insert_value(hash, parts, value)
+    if parts.length > 1
+      part = parts.shift
+      hash[part] ||= {}
+      insert_value(hash[part], parts, value)
+    else
+      hash[parts.first] = value
+    end
+  end
+
 end
