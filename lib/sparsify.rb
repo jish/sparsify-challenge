@@ -7,6 +7,11 @@ module Sparsify
     separator = options.fetch(:separator, ".")
 
     hash.each do |key, value|
+      escaped = Regexp.escape(separator)
+      regex = Regexp.new(escaped)
+      key = key.gsub(/\\/, "\\\\\\\\")
+      key = key.gsub(regex, escaped)
+
       if value.is_a?(Hash)
         prefixed = prefix_keys(key, value, separator)
         result.merge!(prefixed)
@@ -41,8 +46,11 @@ module Sparsify
     separator = options.fetch(:separator, ".")
 
     hash.each do |key, value|
+      key = key.gsub(/\\\\/, "\\")
+
       if key.include?(separator)
-        insert_value(result, key.split(separator), value)
+        parts = gather_parts(key, separator)
+        insert_value(result, parts, value)
       else
         result[key] = value
       end
@@ -59,6 +67,30 @@ module Sparsify
     else
       hash[parts.first] = value
     end
+  end
+
+  def self.gather_parts(key, separator)
+    parts = key.split(separator)
+    previous_fragment = nil
+    result = []
+
+    parts.each do |part|
+      if previous_fragment
+        p = [previous_fragment, part].join(separator)
+        result.push(p)
+        previous_fragment = nil
+        next
+      end
+
+      if part.match(/\\$/)
+        previous_fragment = part.chop
+        next
+      end
+
+      result.push(part)
+    end
+
+    result
   end
 
 end
